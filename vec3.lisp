@@ -14,20 +14,25 @@
 
 (in-package #:rtiow)
 
-(defclass vec3 ()
-  ((x :initarg :x :initform 0.0d0 :accessor vec3-x)
-   (y :initarg :y :initform 0.0d0 :accessor vec3-y)
-   (z :initarg :z :initform 0.0d0 :accessor vec3-z))
-  (:documentation "3D vector, also base class for points, RGB colors, etc."))
-
 (defun make-vec3 (&optional (x 0.0d0) (y 0.0d0) (z 0.0d0))
-  "Create a vec3 with coordinates x, y, z"
-  (make-instance 'vec3 :x x :y y :z z))
+  "Create a 3-element vector with coordinates x, y, z"
+  (make-array 3
+	      :element-type 'double-float
+	      :initial-contents (list x y z)))
+
+(defmacro vec3-x (v)
+  `(aref ,v 0))
+
+(defmacro vec3-y (v)
+  `(aref ,v 1))
+
+(defmacro vec3-z (v)
+  `(aref ,v 2))
 
 (defgeneric vec3-length-squared (vec)
   (:documentation "Returns the square of the length of vec3."))
 
-(defmethod vec3-length-squared ((vec vec3))
+(defmethod vec3-length-squared ((vec vector))
   (+ (expt (vec3-x vec) 2)
      (expt (vec3-y vec) 2)
      (expt (vec3-z vec) 2)))
@@ -35,13 +40,13 @@
 (defgeneric vec3-length (vec)
   (:documentation "Returns length of vec3."))
 
-(defmethod vec3-length ((vec vec3))
+(defmethod vec3-length ((vec vector))
   (sqrt (vec3-length-squared vec)))
 
-(defgeneric vec3-near-zero? (vec3)
+(defgeneric vec3-near-zero? (vec)
   (:documentation "Return true if vec3 is very small"))
 
-(defmethod vec3-near-zero? ((vec vec3))
+(defmethod vec3-near-zero? ((vec vector))
   (and
    (< (vec3-x vec) 0.00000001)
    (< (vec3-y vec) 0.00000001)
@@ -49,20 +54,12 @@
 
 (defun add-vec3 (u v)
   "Returns new vec3 by summing u and v, both of which must be of type vec3."
-  (unless
-      (and (typep u 'vec3)
-	   (typep v 'vec3))
-    (error "Non-vec3 argument."))
   (make-vec3 (+ (vec3-x u) (vec3-x v))
 	     (+ (vec3-y u) (vec3-y v))
 	     (+ (vec3-z u) (vec3-z v))))
 
 (defun sub-vec3 (u v)
   "Returns new vec3 by subtracting v from u. Both u and v must be of type vec3."
-  (unless
-      (and (typep u 'vec3)
-	   (typep v 'vec3))
-    (error "Non-vec3 argument."))
   (make-vec3 (- (vec3-x u) (vec3-x v))
 	     (- (vec3-y u) (vec3-y v))
 	     (- (vec3-z u) (vec3-z v))))
@@ -73,28 +70,18 @@
 
 (defun scale-vec3 (s v)
   "Returns new vec3 with coordinates of vec3 v multiplied by scalar s."
-  (unless (numberp s) (error "Argument s must be a number."))
-  (unless (typep v 'vec3) (error "Argument v must be of type vec3."))
   (make-vec3 (* s (vec3-x v))
 	     (* s (vec3-y v))
 	     (* s (vec3-z v))))
 
 (defun dot-vec3 (u v)
   "Returns the dot product of u and v, both of which must be of type vec3."
-  (unless
-      (and (typep u 'vec3)
-	   (typep v 'vec3))
-    (error "Non-vec3 argument."))
   (+ (* (vec3-x u) (vec3-x v))
      (* (vec3-y u) (vec3-y v))
      (* (vec3-z u) (vec3-z v))))
 
 (defun cross-vec3 (u v)
   "Returns the cross product of u and v, both of which must be of type vec3."
-  (unless
-      (and (typep u 'vec3)
-	   (typep v 'vec3))
-    (error "Non-vec3 argument."))
   (make-vec3 (- (* (vec3-y u) (vec3-z v))
 		(* (vec3-z u) (vec3-y v)))
 	     (- (* (vec3-z u) (vec3-x v))
@@ -104,8 +91,6 @@
 
 (defun unit-vec3 (vec)
   "Returns unit vector with direction of vec, which must be of type vec3."
-  (unless (typep vec 'vec3)
-    (error "Argument vec must be of type vec3."))
   (scale-vec3 (/ (vec3-length vec)) vec))
 
 (defun reflect-vec3 (vec normal)
@@ -151,35 +136,29 @@
 	p
 	(random-vec3-in-unit-disk))))
 
-;;; point and color classes are effectively aliases of vec3
-(defclass point (vec3) ()
-  (:documentation "A point in 3D space."))
-
+;;; point and color are effectively aliases of vec3
 (defun make-point (&optional (x 0.0d0) (y 0.0d0) (z 0.0d0))
   "Create a point with coordinates x, y, z."
-  (make-instance 'point :x x :y y :z z))
-
-(defclass color (vec3)
-  ((x :initarg :r :accessor color-r)
-   (y :initarg :g :accessor color-g)
-   (z :initarg :b :accessor color-b))
-  (:documentation "An RGB color."))
+  (make-vec3 x y z))
 
 (defun make-color (&optional (r 0.0d0) (g 0.0d0) (b 0.0d0))
   "Create a color with red, green, and blue components r, g, and b."
-  (make-instance 'color :r r :g g :b b))
+  (make-vec3 r g b))
+
+(defmacro color-r (v)
+  `(aref ,v 0))
+
+(defmacro color-g (v)
+  `(aref ,v 1))
+
+(defmacro color-b (v)
+  `(aref ,v 2))
 
 (defun copy-color (src dst)
   "Put the r, g, and b components from src into dst."
   (setf (color-r dst) (color-r src)
 	(color-g dst) (color-g src)
 	(color-b dst) (color-b src)))
-
-(defun vec3->color (vec)
-  "Create an instance of color using components of vec."
-  (make-instance 'color :r (vec3-x vec)
-			:g (vec3-y vec)
-			:b (vec3-z vec)))
 
 (defun add-color (u v)
   "Like add-vec3, but returns a color."
@@ -197,7 +176,7 @@
 (defgeneric write-color (stream pixel-color samples-per-pixel)
   (:documentation "Write the translated [0,255] value of each color component to stream."))
 
-(defmethod write-color (stream (pixel-color color) samples-per-pixel)
+(defmethod write-color (stream (pixel-color vector) samples-per-pixel)
   (let* ((scale (/ 1.0d0 samples-per-pixel))
 	 ;; Divide by number of samples and gamma correct for gamma = 2.0
 	 (r (sqrt (* scale (color-r pixel-color))))

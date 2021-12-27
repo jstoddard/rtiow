@@ -42,9 +42,8 @@
 		  (make-color))) ; ray absorbed, return plain black
 	    (let* ((unit-direction (unit-vec3 (ray-direction r)))
 		   (s (* 0.5d0 (+ (vec3-y unit-direction) 1.0d0)))) 
-	      (vec3->color
-	       (add-vec3 (scale-vec3 (- 1.0d0 s) (make-color 1.0d0 1.0d0 1.0d0))
-			 (scale-vec3 s (make-color 0.5d0 0.7d0 1.0d0)))))))))
+	      (add-color (scale-vec3 (- 1.0d0 s) (make-color 1.0d0 1.0d0 1.0d0))
+			 (scale-vec3 s (make-color 0.5d0 0.7d0 1.0d0))))))))
 
 (defun random-scene ()
   "Return hittable-list with a bunch of spheres."
