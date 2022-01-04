@@ -29,24 +29,18 @@
 (defmacro vec3-z (v)
   `(aref ,v 2))
 
-(defgeneric vec3-length-squared (vec)
-  (:documentation "Returns the square of the length of vec3."))
-
-(defmethod vec3-length-squared ((vec vector))
+(defun vec3-length-squared (vec)
+  "Returns the square of the length of vec (a three-element vector of double floats)"
   (+ (expt (vec3-x vec) 2)
      (expt (vec3-y vec) 2)
      (expt (vec3-z vec) 2)))
 
-(defgeneric vec3-length (vec)
-  (:documentation "Returns length of vec3."))
-
-(defmethod vec3-length ((vec vector))
+(defun vec3-length (vec)
+  "Returns the length of vec (a three-element vector of double floats)"
   (sqrt (vec3-length-squared vec)))
 
-(defgeneric vec3-near-zero? (vec)
-  (:documentation "Return true if vec3 is very small"))
-
-(defmethod vec3-near-zero? ((vec vector))
+(defun vec3-near-zero? (vec)
+  "Return true if vec3 is very small"
   (and
    (< (vec3-x vec) 0.00000001)
    (< (vec3-y vec) 0.00000001)
@@ -173,10 +167,8 @@
 	 (b (+ (random diff) min)))
     (make-color r g b)))
 
-(defgeneric write-color (stream pixel-color samples-per-pixel)
-  (:documentation "Write the translated [0,255] value of each color component to stream."))
-
-(defmethod write-color (stream (pixel-color vector) samples-per-pixel)
+(defun write-color (stream pixel-color samples-per-pixel)
+  "Write the translated [0,255] value of each color component to stream."
   (let* ((scale (/ 1.0d0 samples-per-pixel))
 	 ;; Divide by number of samples and gamma correct for gamma = 2.0
 	 (r (sqrt (* scale (color-r pixel-color))))
