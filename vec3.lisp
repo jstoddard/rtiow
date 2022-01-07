@@ -29,12 +29,14 @@
 (defmacro vec3-z (v)
   `(aref ,v 2))
 
+(declaim (inline vec3-length-squared))
 (defun vec3-length-squared (vec)
   "Returns the square of the length of vec (a three-element vector of double floats)"
   (+ (expt (vec3-x vec) 2)
      (expt (vec3-y vec) 2)
      (expt (vec3-z vec) 2)))
 
+(declaim (inline vec3-length))
 (defun vec3-length (vec)
   "Returns the length of vec (a three-element vector of double floats)"
   (sqrt (vec3-length-squared vec)))

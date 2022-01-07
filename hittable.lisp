@@ -83,5 +83,4 @@
     (dolist (obj (hittable-objs l) hit-anything)
       (when (hit obj r s-min closest-so-far temp-rec)
 	(setf hit-anything t closest-so-far (hit-record-s temp-rec))
-	(copy-rec temp-rec rec)))
-    hit-anything))
+	(copy-rec temp-rec rec)))))
